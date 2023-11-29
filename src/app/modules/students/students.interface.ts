@@ -1,6 +1,6 @@
 // import { Schema, model, connect } from 'mongoose';
 
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 
 export type TStudentName = {
     firstName: string;
@@ -26,7 +26,7 @@ export type TLocalGuardian = {
 
 export type TStudent = {
     id: string;
-    password: string;
+    user: Types.ObjectId
     name: TStudentName;
     gender: 'male' | 'female' | 'other',
     dateOfBirth?: string | undefined,

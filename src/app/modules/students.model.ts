@@ -1,8 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { TGuardian, TLocalGuardian, TStudent, StudentModel, TStudentName } from './students/students.interface';
 import validator from 'validator';
-import bcrypt from 'bcrypt'
-import config from '../config';
+
 
 const nameSchema = new Schema<TStudentName>({
     firstName: {
@@ -49,8 +48,16 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 });
 
 const studentSchema = new Schema<TStudent, StudentModel>({
-    id: { type: String, unique: true },
-    password: { type: String, required: [true, 'Password is required'] },
+    id: {
+        type: String,
+        //   unique: true 
+    },
+    user: {
+        type: Schema.ObjectId,
+        required: [true, 'User id is required'],
+        unique: true,
+        ref: 'User',
+    },
     name: {
         type: nameSchema,
         required: [true, 'Student name is required'],
@@ -102,21 +109,11 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     }
 });
 
-studentSchema.pre('save', async function (next) {
-    // console.log(this, 'before save student data PRE')
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const user = this
-    user.password = await bcrypt.hash(user.password, Number(config.bcrypt_salt_rounds));
-    next()
-})
-studentSchema.post('save', function (doc, next) {
-    doc.password = ''
-    next()
-})
 
-studentSchema.pre('find', function (next) {
-    console.log(this)
-})
+
+// studentSchema.pre('find', function (next) {
+//     console.log(this)
+// })
 
 
 

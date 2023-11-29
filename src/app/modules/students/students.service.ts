@@ -1,19 +1,13 @@
 import { Student } from "../students.model";
-import { TStudent } from "./students.interface";
+// import { TStudent } from "./students.interface";
 
-const createStudentIntoDB = async (studentData: TStudent) => {
-    if (await Student.isStudentExists(studentData.id)) {
-        throw Error('student already exists custom static')
-    }
-    const result = await Student.create(studentData) //builtin static methods
-
-    /* const student = new Student(studentData) // create an instance builtin instance methods
-    if (await student.isStudentExists(studentData.id)) {
-        throw Error('student already exists')
-    }
-    const result = student.save() */
-    return result
-}
+// const createStudentIntoDB = async (studentData: TStudent) => {
+//     if (await Student.isStudentExists(studentData.id)) {
+//         throw Error('student already exists custom static')
+//     }
+//     const result = await Student.create(studentData)
+//     return result
+// }
 
 const getAllStudentsFormDB = async () => {
     const result = await Student.find()
@@ -31,7 +25,7 @@ const deleteStudnetFromDB = async (id: string) => {
 }
 
 export const studnetService = {
-    createStudentIntoDB,
+    // createStudentIntoDB,
     getAllStudentsFormDB,
     getSingleStudentFromDB,
     deleteStudnetFromDB
