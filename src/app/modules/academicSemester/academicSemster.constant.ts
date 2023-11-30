@@ -1,6 +1,6 @@
 import { TAcademicSemesterCode, TAcademicSemesterName, TMonths } from "./academicSemster.interface";
 
-export const Months: TMonths[] = [
+export const AcademicSemesterMonths: TMonths[] = [
     'January',
     'February',
     'March',
