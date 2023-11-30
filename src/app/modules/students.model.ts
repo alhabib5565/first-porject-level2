@@ -94,19 +94,14 @@ const studentSchema = new Schema<TStudent, StudentModel>({
         required: [true, 'Local guardian information is required'],
     },
     profileImg: { type: String },
-    isActive: {
-        type: String,
-        required: [true, 'Active status is required'],
-        enum: {
-            values: ['active', 'blocked'],
-            message: '{VALUE} is not supported for active status',
-            default: 'active',
-        },
-    },
     isDeleted: {
         type: Boolean,
         default: false
-    }
+    },
+    admissionSemester: {
+        type: Schema.Types.ObjectId,
+        ref: 'AcademicSemester',
+    },
 });
 
 

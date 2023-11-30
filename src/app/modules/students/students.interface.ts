@@ -39,8 +39,8 @@ export type TStudent = {
     guardian: TGuardian,
     localGuardian: TLocalGuardian,
     profileImg?: string | undefined,
-    isActive: 'active' | 'blocked',
-    isDeleted: boolean
+    isDeleted: boolean,
+    admissionSemester: Types.ObjectId;
 }
 
 export interface StudentModel extends Model<TStudent> {
