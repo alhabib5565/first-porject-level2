@@ -1,7 +1,7 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
 import { studnetService } from "./students.service";
 import sendResponse from "../../../utils/sendResponse";
 import httpStatus from "http-status";
+import catchAsync from "../../../utils/catchAsync";
 // const createStudent = async (req: Request, res: Response) => {
 //     try {
 //         const studentData = req.body.student
@@ -35,11 +35,6 @@ import httpStatus from "http-status";
 //     }
 // }
 
-const catchAsync = (fn: RequestHandler) => {
-    return (req: Request, res: Response, next: NextFunction) => {
-        Promise.resolve(fn(req, res, next)).catch(err => next(err))
-    }
-}
 
 const getStudents = catchAsync(async (req, res) => {
     const result = await studnetService.getAllStudentsFormDB()

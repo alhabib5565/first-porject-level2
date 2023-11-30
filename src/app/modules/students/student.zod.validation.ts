@@ -28,23 +28,25 @@ const LocalGuardianSchema = z.object({
 });
 
 // Define a Zod schema for the Student
-const StudentValidationSchema = z.object({
-    id: z.string().length(6, { message: 'id must be 6 characters' }),
+export const createStudentValidationSchema = z.object({
+    // id: z.string().length(6, { message: 'id must be 6 characters' }),
     password: z.string().max(20),
-    name: NameValidationSchema,
-    gender: z.enum(['male', 'female', 'other']),
-    dateOfBirth: z.string().optional(),
-    email: z.string().email({ message: 'Invalid email format' }),
-    contactNo: z.string().min(1, { message: 'Contact number must not be empty' }),
-    emergencyContactsNo: z.string().min(1, { message: 'Emergency contact number must not be empty' }),
-    bloodGroup: z.enum(['A+', 'B+', 'AB+', 'O+', 'A-', 'B-', 'AB-', 'O-']),
-    presentAddress: z.string().min(1, { message: 'Present address must not be empty' }),
-    permanentAddress: z.string().min(1, { message: 'Permanent address must not be empty' }),
-    guardian: GuardianValidationSchema,
-    localGuardian: LocalGuardianSchema,
-    profileImg: z.string().optional(),
-    isActive: z.enum(['active', 'blocked']),
-    isDelete: z.boolean().default(true)
+    student: z.object({
+        name: NameValidationSchema,
+        gender: z.enum(['male', 'female', 'other']),
+        dateOfBirth: z.string().optional(),
+        email: z.string().email({ message: 'Invalid email format' }),
+        contactNo: z.string().min(1, { message: 'Contact number must not be empty' }),
+        emergencyContactsNo: z.string().min(1, { message: 'Emergency contact number must not be empty' }),
+        bloodGroup: z.enum(['A+', 'B+', 'AB+', 'O+', 'A-', 'B-', 'AB-', 'O-']),
+        presentAddress: z.string().min(1, { message: 'Present address must not be empty' }),
+        permanentAddress: z.string().min(1, { message: 'Permanent address must not be empty' }),
+        guardian: GuardianValidationSchema,
+        localGuardian: LocalGuardianSchema,
+        profileImg: z.string().optional(),
+    })
 });
 
-export default StudentValidationSchema;
+// export const studentValidations = {
+//     createStudentValidationSchema
+// };

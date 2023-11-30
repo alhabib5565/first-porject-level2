@@ -20,12 +20,11 @@ app.get('/', (req: Request, res: Response) => {
   res.send(a);
 });
 
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 // global error handler
-app.use(globalErrorHandler)
+app.use(globalErrorHandler);
 
 // not found
-app.use(notFound)
+app.use(notFound);
 
 export default app;
