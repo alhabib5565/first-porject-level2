@@ -19,6 +19,9 @@ const createStudentFmDB = async (password: string, payload: TStudent) => {
         user.password = password
     }
     const admissionSemester = await AcademicSemester.findById(payload.admissionSemester)
+    if (!admissionSemester) {
+        throw Error("Faild to create user")
+    }
     user.id = await generateStudentId(admissionSemester)
 
 
