@@ -48,6 +48,10 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 });
 
 const studentSchema = new Schema<TStudent, StudentModel>({
+    id: {
+        type: String,
+        unique: true
+    },
     user: {
         type: Schema.ObjectId,
         required: [true, 'User id is required'],
@@ -97,6 +101,10 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     admissionSemester: {
         type: Schema.Types.ObjectId,
         ref: 'AcademicSemester',
+    },
+    academicDepartment: {
+        type: Schema.Types.ObjectId,
+        ref: 'AcademicDepartment',
     },
 });
 

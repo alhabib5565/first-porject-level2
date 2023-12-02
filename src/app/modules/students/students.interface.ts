@@ -41,6 +41,7 @@ export type TStudent = {
     profileImg?: string | undefined,
     isDeleted: boolean,
     admissionSemester: Types.ObjectId;
+    academicDepartment: Types.ObjectId;
 }
 
 export interface StudentModel extends Model<TStudent> {
