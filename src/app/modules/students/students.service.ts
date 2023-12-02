@@ -3,16 +3,19 @@ import { Student } from "../students.model";
 import { User } from "../user/user.model";
 import httpStatus from "http-status";
 import AppError from "../../errors/appErrors";
+import { TStudent } from "./students.interface";
 // import { TStudent } from "./students.interface";
 
 
 const getAllStudentsFormDB = async () => {
-    const result = await Student.find().populate('admissionSemester').populate({
-        path: "academicDepartment",
-        populate: {
-            path: "academicFaculty"
-        }
-    })
+    const result = await Student.find()
+        .populate('admissionSemester')
+        .populate({
+            path: "academicDepartment",
+            populate: {
+                path: "academicFaculty"
+            }
+        })
     return result
 }
 
@@ -59,9 +62,40 @@ const deleteStudnetFromDB = async (id: string) => {
 
 }
 
+const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
+    const { name, guardian, localGuardian, ...remainingStudentData } = payload;
+
+    const modifiedUpdatedData: Record<string, unknown> = {
+        ...remainingStudentData
+    }
+
+    if (name && Object.keys(name).length) {
+        for (const [key, value] of Object.entries(name)) {
+            modifiedUpdatedData[`name.${key}`] = value;
+        }
+    }
+
+    if (guardian && Object.keys(guardian).length) {
+        for (const [key, value] of Object.entries(guardian)) {
+            modifiedUpdatedData[`guardian.${key}`] = value;
+        }
+    }
+
+    if (localGuardian && Object.keys(localGuardian).length) {
+        for (const [key, value] of Object.entries(localGuardian)) {
+            modifiedUpdatedData[`localGuardian.${key}`] = value;
+        }
+    }
+
+    console.log(modifiedUpdatedData);
+
+
+    const result = await Student.findOneAndUpdate({ id }, modifiedUpdatedData)
+    return result
+}
 export const studnetService = {
-    // createStudentIntoDB,
     getAllStudentsFormDB,
     getSingleStudentFromDB,
-    deleteStudnetFromDB
+    deleteStudnetFromDB,
+    updateStudentIntoDB
 }

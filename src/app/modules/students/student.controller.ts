@@ -59,7 +59,7 @@ const getAStudents = catchAsync(async (req, res) => {
 
 const deleteStudent = catchAsync(async (req, res) => {
     const studentId = req.params.studentId
-    const result = studnetService.deleteStudnetFromDB(studentId)
+    const result = await studnetService.deleteStudnetFromDB(studentId)
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -67,10 +67,23 @@ const deleteStudent = catchAsync(async (req, res) => {
         data: result
     })
 })
+const updateStudent = catchAsync(async (req, res) => {
+    const { studentId } = req.params
+    const { student } = req.body
+    const result = await studnetService.updateStudentIntoDB(studentId, student)
+    // console.log('controller', result)
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Student update Successfull!',
+        data: result
+    })
+})
 
 export const studentControllers = {
     getStudents,
     getAStudents,
-    deleteStudent
+    deleteStudent,
+    updateStudent
 }
 
