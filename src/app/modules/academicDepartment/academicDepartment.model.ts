@@ -23,7 +23,7 @@ academicDepartmentSchema.pre('save', async function (next) {
     })
 
     if (isDepartmentExists) {
-        throw Error("this department already exists")
+        throw new AppError(404, "this department already exists")
     }
     next()
 })
