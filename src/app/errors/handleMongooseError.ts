@@ -1,18 +1,19 @@
-import { ZodError, ZodIssue } from "zod"
-import { TerrorSources } from "../interface/error"
+import mongoose from "mongoose"
+import { TGenericErrorResponse, TerrorSources } from "../interface/error"
 
-export const zodError = (err: ZodError) => {
-    const errorSource: TerrorSources = err.issues.map((issue: ZodIssue) => {
+
+export const mongooseValidationError = (err: mongoose.Error.ValidationError): TGenericErrorResponse => {
+    const errorSource: TerrorSources = Object.values(err.errors).map((val) => {
         return {
-            path: issue?.path[issue.path.length - 1],
-            message: issue.message
+            path: val.path,
+            message: val.message
         }
     })
 
-    const statusCode = 400
+    const statusCode = 500
     return {
         statusCode,
-        message: 'validation error',
-        errorSource: errorSource
+        message: 'validation error mon',
+        errorSource
     }
 }

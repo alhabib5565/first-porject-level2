@@ -4,8 +4,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { TerrorSources } from '../interface/error';
-import { zodError } from '../errors/handleMongooseError';
-import mongoose from 'mongoose';
+import { zodError } from '../errors/handleZodError';
+import { mongooseValidationError } from '../errors/handleMongooseError';
+import { castValidationError } from '../errors/handleCastError';
+import { handleDuplicateError } from '../errors/handleDuplicateError';
 
 
 // eslint-disable-next-line no-unused-vars
@@ -21,21 +23,6 @@ const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFun
         }
     ]
 
-    const mongooseValidationError = (err: mongoose.Error.ValidationError) => {
-        const errorSource: TerrorSources = Object.values(err.errors).map((val) => {
-            return {
-                path: val.path,
-                message: val.message
-            }
-        })
-
-        const statusCode = 500
-        return {
-            statusCode,
-            message: 'validation error mon',
-            errorSource
-        }
-    }
 
     if (err instanceof ZodError) {
         const simplifiedError = zodError(err)
@@ -44,6 +31,16 @@ const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFun
         errorSources = simplifiedError.errorSource
     } else if (err.name === "ValidationError") {
         const simplifiedError = mongooseValidationError(err)
+        statusCode = simplifiedError.statusCode
+        message = simplifiedError.message
+        errorSources = simplifiedError.errorSource
+    } else if (err.name === 'CastError') {
+        const simplifiedError = castValidationError(err)
+        statusCode = simplifiedError.statusCode
+        message = simplifiedError.message
+        errorSources = simplifiedError.errorSource
+    } else if (err.code === 11000) {
+        const simplifiedError = handleDuplicateError(err)
         statusCode = simplifiedError.statusCode
         message = simplifiedError.message
         errorSources = simplifiedError.errorSource
