@@ -7,7 +7,8 @@ const router = Router()
 
 router.post(
     '/create-academic-department',
-    validateRequest(AcademicDepartmentValidation.createAcademicDepartmentValidationSchema), AcademicDepartmentControllers.createAcademicDepartment
+    // validateRequest(AcademicDepartmentValidation.createAcademicDepartmentValidationSchema), 
+    AcademicDepartmentControllers.createAcademicDepartment
 )
 router.get('/', AcademicDepartmentControllers.getAllAcademicDepartments)
 router.get('/:departmentId', AcademicDepartmentControllers.getSingleAcademicDepartment)

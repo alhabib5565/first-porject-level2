@@ -8,7 +8,8 @@ const router = Router()
 
 router.post(
     '/create-academic-semester',
-    validateRequest(createAcademicSemesterValidations.createAcdemicSemesterValidationSchema), academicSemesterController.createAcademicSemester)
+    // validateRequest(createAcademicSemesterValidations.createAcdemicSemesterValidationSchema),
+    academicSemesterController.createAcademicSemester)
 router.get('/', academicSemesterController.getAllAcademicSemster)
 router.get('/:id', academicSemesterController.getSingleAcademicSemster)
 router.patch('/:id',
