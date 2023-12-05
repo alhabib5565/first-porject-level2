@@ -9,7 +9,7 @@ const createStudent = catchAsync(async (req, res) => {
     const { password, student } = req.body
     // const zodParseData = StudentValidationSchema.parse(studentData)
     //         console.log(zodParseData)
-    const result = await userService.createStudentFmDB(password, student)
+    const result = await userService.createStudentIntoDB(password, student)
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -18,6 +18,18 @@ const createStudent = catchAsync(async (req, res) => {
     });
 })
 
+const createFaculty = catchAsync(async (req, res) => {
+    const { password, faculty } = req.body
+    const result = await userService.createFacultyIntoDB(password, faculty)
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Faculty is created succesfully',
+        data: result,
+    });
+})
+
 export const userController = {
-    createStudent
+    createStudent,
+    createFaculty
 }

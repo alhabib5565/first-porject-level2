@@ -5,13 +5,15 @@ import { Student } from "../students.model";
 import { TStudent } from "../students/students.interface";
 import { TUser } from "./user.interface";
 import { User } from "./user.model";
-import { generateStudentId } from "./user.utils";
+import { generateFacultyId, generateStudentId } from "./user.utils";
 import AppError from "../../errors/appErrors";
 import httpStatus from "http-status";
+import { TFaculty } from "../faculty/faculty.interface";
+import { Faculty } from "../faculty/faculty.model";
 
 
 
-const createStudentFmDB = async (password: string, payload: TStudent) => {
+const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
     const user: Partial<TUser> = {}
 
@@ -58,6 +60,48 @@ const createStudentFmDB = async (password: string, payload: TStudent) => {
 
 }
 
+
+const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
+    const user: Partial<TUser> = {}
+    user.role = 'faculty'
+    if (!password) {
+        user.password = config.password as string
+    } else {
+        user.password = password
+    }
+
+    const session = await mongoose.startSession()
+
+    try {
+        session.startTransaction()
+        user.id = await generateFacultyId()
+        // create a user (transaction-1)
+        const newUser = await User.create([user], { session })
+        // console.log(newUser)
+        if (!newUser.length) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user')
+        }
+        payload.user = newUser[0]._id
+        payload.id = newUser[0].id
+        // create student
+        const faculty = await Faculty.create([payload], { session })
+        if (!faculty.length) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create faculty')
+        }
+
+
+        await session.commitTransaction()
+        await session.endSession()
+
+        return faculty
+    } catch (error) {
+        await session.abortTransaction();
+        await session.endSession();
+        throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create faculty');
+    }
+}
+
 export const userService = {
-    createStudentFmDB
+    createStudentIntoDB,
+    createFacultyIntoDB
 }
