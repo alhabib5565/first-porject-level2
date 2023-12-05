@@ -6,7 +6,7 @@ import { updateStudentValidationSchema } from './student.zod.validation'
 
 const router = express.Router()
 
-router.get('/', studentControllers.getStudents)
+router.get('/', studentControllers.getAllStudents)
 router.get('/:studentId', studentControllers.getAStudents)
 router.delete('/:studentId', studentControllers.deleteStudent)
 router.patch(

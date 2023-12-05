@@ -36,8 +36,8 @@ import catchAsync from "../../../utils/catchAsync";
 // }
 
 
-const getStudents = catchAsync(async (req, res) => {
-    const result = await studnetService.getAllStudentsFormDB()
+const getAllStudents = catchAsync(async (req, res) => {
+    const result = await studnetService.getAllStudentsFormDB(req.query)
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -81,7 +81,7 @@ const updateStudent = catchAsync(async (req, res) => {
 })
 
 export const studentControllers = {
-    getStudents,
+    getAllStudents,
     getAStudents,
     deleteStudent,
     updateStudent
