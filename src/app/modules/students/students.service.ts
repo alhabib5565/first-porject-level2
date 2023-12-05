@@ -4,70 +4,99 @@ import { User } from "../user/user.model";
 import httpStatus from "http-status";
 import AppError from "../../errors/appErrors";
 import { TStudent } from "./students.interface";
+import { QueryBuilder } from "../../builder/QueryBuilder";
+import { studentSearchableFields } from "./student.constant";
 // import { TStudent } from "./students.interface";
 
 
+// const getAllStudentsFormDB = async (query: Record<string, unknown>) => {
+
+//     let searchTerm = ''
+//     console.log('base query', query)
+
+//     if (query.studentTerm) {
+//         searchTerm = query.studentTerm as string
+//     }
+//     const studentSearchableFields = ['email', 'name.firstName']
+//     const searchQuery = Student.find({
+//         $or: studentSearchableFields.map(filed => ({
+//             [filed]: { $regex: searchTerm, $options: 'i' }
+//         }))
+//     })
+
+//     const excludeFields = ['studentTerm', 'sort', 'limit', 'page', 'fileds']
+//     const queryObj = { ...query }
+//     excludeFields.forEach((el) => delete queryObj[el]);
+//     console.log('object query', queryObj)
+
+//     // filtering 
+//     const filterQuery = searchQuery.find(queryObj)
+//         .populate('admissionSemester')
+//         .populate({
+//             path: "academicDepartment",
+//             populate: {
+//                 path: "academicFaculty"
+//             }
+//         })
+
+//     // SORTING FUNCTIONALITY:
+//     let sort = '-gender'; // SET DEFAULT VALUE 
+
+//     if (query.sort) {
+//         sort = query.sort as string;
+//     }
+
+//     const sortQuery = filterQuery.sort(sort);
+
+//     // limiting 
+//     let limit = 1; // SET DEFAULT VALUE 
+//     let page = 1
+//     let skip = 0
+//     if (query.limit) {
+//         limit = Number(query.limit)
+//     }
+
+//     if (query.page) {
+//         page = Number(query.page)
+//         skip = (page - 1) * limit
+//     }
+//     const limitQuery = sortQuery.skip(skip).limit(limit)
+
+//     let fileds = ''
+//     if (query.fileds) {
+//         fileds = (query.fileds as string).split(',').join(' ')
+//     }
+
+//     const selectQuery = limitQuery.select(fileds)
+
+//     return selectQuery
+// }
+
 const getAllStudentsFormDB = async (query: Record<string, unknown>) => {
 
-    let searchTerm = ''
-    console.log('base query', query)
-
-    if (query.studentTerm) {
-        searchTerm = query.studentTerm as string
-    }
-    const studentSearchableFields = ['email', 'name.firstName']
-    const searchQuery = Student.find({
-        $or: studentSearchableFields.map(filed => ({
-            [filed]: { $regex: searchTerm, $options: 'i' }
-        }))
-    })
-
-    const excludeFields = ['studentTerm', 'sort', 'limit', 'page', 'fileds']
-    const queryObj = { ...query }
-    excludeFields.forEach((el) => delete queryObj[el]);
-    console.log('object query', queryObj)
-
-    // filtering 
-    const filterQuery = searchQuery.find(queryObj)
+    const studentQuery = new QueryBuilder(Student.find()
         .populate('admissionSemester')
         .populate({
-            path: "academicDepartment",
+            path: 'academicDepartment',
             populate: {
                 path: "academicFaculty"
             }
-        })
+        }), query)
+        .search(studentSearchableFields)
+        .filter()
+        .sort()
+        .paginate()
+        .fields()
+    // .populate('admissionSemester')
+    //         .populate({
+    //             path: "academicDepartment",
+    //             populate: {
+    //                 path: "academicFaculty"
+    //             }
+    //         })
 
-    // SORTING FUNCTIONALITY:
-    let sort = '-gender'; // SET DEFAULT VALUE 
-
-    if (query.sort) {
-        sort = query.sort as string;
-    }
-
-    const sortQuery = filterQuery.sort(sort);
-
-    // limiting 
-    let limit = 1; // SET DEFAULT VALUE 
-    let page = 1
-    let skip = 0
-    if (query.limit) {
-        limit = Number(query.limit)
-    }
-
-    if (query.page) {
-        page = Number(query.page)
-        skip = (page - 1) * limit
-    }
-    const limitQuery = sortQuery.skip(skip).limit(limit)
-
-    let fileds = ''
-    if (query.fileds) {
-        fileds = (query.fileds as string).split(',').join(' ')
-    }
-
-    const selectQuery = limitQuery.select(fileds)
-
-    return selectQuery
+    const result = await studentQuery?.modelQuery
+    return result
 }
 
 const getSingleStudentFromDB = async (id: string) => {
