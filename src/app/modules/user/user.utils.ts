@@ -87,7 +87,7 @@ export const findLastAdminId = async () => {
         })
         .lean();
 
-    return lastAdmin?.id ? lastAdmin.id.substring(2) : undefined;
+    return lastAdmin?.id ? lastAdmin.id : undefined;
 };
 
 export const generateAdminId = async () => {
