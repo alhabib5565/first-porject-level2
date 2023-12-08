@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // import { Schema, model, connect } from 'mongoose';
 
 import { Model, Types } from "mongoose";

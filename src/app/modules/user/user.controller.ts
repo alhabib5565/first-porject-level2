@@ -35,7 +35,7 @@ const createAdmin = catchAsync(async (req, res) => {
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: 'Faculty is created succesfully',
+        message: 'Admin is created succesfully',
         data: result,
     });
 })
