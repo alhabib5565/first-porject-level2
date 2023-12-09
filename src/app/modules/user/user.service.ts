@@ -73,7 +73,6 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
     }
 
     const session = await mongoose.startSession()
-
     try {
         session.startTransaction()
         user.id = await generateFacultyId()
@@ -87,6 +86,7 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
         payload.id = newUser[0].id
         // create student
         const faculty = await Faculty.create([payload], { session })
+        // console.log(faculty)
         if (!faculty.length) {
             throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create faculty')
         }
@@ -97,6 +97,7 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
 
         return faculty
     } catch (error) {
+        console.log(error)
         await session.abortTransaction();
         await session.endSession();
         throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create faculty');
