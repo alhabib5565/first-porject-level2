@@ -10,7 +10,7 @@ const createCourseIntoDB = async (payload: TCourse) => {
 };
 
 const getAllCoursesFromDB = async (query: Record<string, unknown>) => {
-    const courseQuery = new QueryBuilder(Course.find().populate("preRequisiteCourses.course"), query)
+    const courseQuery = new QueryBuilder(Course.find(), query)
         .search(CourseSearchableFields)
         .filter()
         .sort()
@@ -22,14 +22,40 @@ const getAllCoursesFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleCourseFromDB = async (id: string) => {
-    const result = await Course.findById(id)
+    const result = await Course.findById(id).populate("preRequisiteCourses.course")
     return result;
 };
 const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
-    const result = await Course.findByIdAndUpdate(id, payload, {
-        new: true
+    const { preRequisiteCourses, ...remainingCourseData } = payload
+    const updateBasicCourseInfo = await Course.findByIdAndUpdate(id, remainingCourseData, {
+        new: true,
+        runValidators: true
     })
-    return result;
+    if (preRequisiteCourses && preRequisiteCourses.length > 0) {
+        const delteePreRequisiteCourse = preRequisiteCourses
+            .filter(preRequisiteCourse => preRequisiteCourse.course && preRequisiteCourse.isDeleted)
+            .map(el => el.course)
+
+        const newPreRequisiteCourse = preRequisiteCourses
+            .filter(preRequisiteCourse => preRequisiteCourse.course && !preRequisiteCourse.isDeleted)
+
+        const delet = await Course.findByIdAndUpdate(
+            id,
+            { $pull: { preRequisiteCourses: { course: { $in: delteePreRequisiteCourse } } } },
+            { updateBasicCourseInfo })
+
+        const add = await Course.findByIdAndUpdate(
+            id,
+            {
+                $addToSet: { preRequisiteCourses: { $each: newPreRequisiteCourse } }
+            },
+            {
+                updateBasicCourseInfo
+            })
+
+        return { delet, add }
+    }
+    // return ;
 };
 
 const deleteCourseFromDB = async (id: string) => {
