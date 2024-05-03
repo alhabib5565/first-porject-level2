@@ -4,6 +4,7 @@ import { AcademicSemester } from "../academicSemester/academicSemesterModel"
 import { TSemesterRegistration } from "./semesterRegistration.interface"
 import { SemesterRegistration } from "./semesterRegistration.model"
 import { QueryBuilder } from "../../builder/QueryBuilder"
+import { RegistrationStatus } from "./semesterRegistration.constant"
 
 const createSemesterRegistrationIntoDB = async (payload: TSemesterRegistration) => {
     const academicSemester = payload.academicSemester
@@ -63,20 +64,40 @@ const getSingleSemesterRegistrationsFromDB = async (id: string) => {
 };
 
 const updateSemesterRegistrationIntoDB = async (id: string, payload: Partial<TSemesterRegistration>) => {
+    const newStatus = payload.status
     const isAcademicSemesterExists = await SemesterRegistration.findById(id)
     if (!isAcademicSemesterExists) {
         throw new AppError(httpStatus.NOT_FOUND, 'this Academic semester is not found')
     }
 
     const currentSemesterStatus = isAcademicSemesterExists?.status
-    if (currentSemesterStatus === "ENDED") {
+    if (currentSemesterStatus === RegistrationStatus.ENDED) {
         throw new AppError(
             httpStatus.BAD_REQUEST,
             `This semester is already ${currentSemesterStatus}`,
         );
     }
 
-    console.log('ended')
+    if (currentSemesterStatus === RegistrationStatus.UPCOMING && newStatus === RegistrationStatus.ENDED) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `You can not directly change status from ${currentSemesterStatus} to ${newStatus}`,
+        );
+    }
+
+    if (
+        currentSemesterStatus === RegistrationStatus.ONGOING &&
+        newStatus === RegistrationStatus.UPCOMING
+    ) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `You can not directly change status from ${currentSemesterStatus} to ${newStatus}`,
+        );
+    }
+
+
+    const result = await SemesterRegistration.findByIdAndUpdate(id, payload, { new: true })
+    return result
 
 }
 
