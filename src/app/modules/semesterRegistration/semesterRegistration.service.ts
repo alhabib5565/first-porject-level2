@@ -5,6 +5,8 @@ import { TSemesterRegistration } from "./semesterRegistration.interface"
 import { SemesterRegistration } from "./semesterRegistration.model"
 import { QueryBuilder } from "../../builder/QueryBuilder"
 import { RegistrationStatus } from "./semesterRegistration.constant"
+import mongoose from "mongoose"
+import { OfferedCourse } from "../OfferedCourse/OfferedCourse.model"
 
 const createSemesterRegistrationIntoDB = async (payload: TSemesterRegistration) => {
     const academicSemester = payload.academicSemester
@@ -101,8 +103,52 @@ const updateSemesterRegistrationIntoDB = async (id: string, payload: Partial<TSe
 
 }
 
-const deleteSemesterRegistrationFromDB = async () => {
+const deleteSemesterRegistrationFromDB = async (id: string) => {
+    const isSemesterRegistrationExist = await SemesterRegistration.findById(id)
 
+    if (!isSemesterRegistrationExist) {
+        throw new AppError(httpStatus.NOT_FOUND, 'this semester registration not fund')
+    }
+
+    const semesterRegistrationStatus = isSemesterRegistrationExist.status
+
+    if (semesterRegistrationStatus !== 'UPCOMING') {
+        throw new AppError(httpStatus.BAD_REQUEST, `You can not delete ${semesterRegistrationStatus} semester registration `)
+    }
+
+
+    const session = await mongoose.startSession()
+
+
+    try {
+        session.startTransaction()
+        const deleteSemesterRegistration = await SemesterRegistration.findByIdAndDelete(id, { session })
+
+
+        if (!deleteSemesterRegistration) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'semester registration delete failed')
+        }
+
+
+        const deleteOffererCourses = await OfferedCourse.deleteMany({ semesterRegistration: id }, { session })
+
+        if (!deleteOffererCourses) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'Offered courses delete failed on the semester')
+        }
+
+
+        await session.commitTransaction()
+        await session.endSession()
+
+        return deleteSemesterRegistration
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+        await session.abortTransaction();
+        await session.endSession();
+        throw new AppError(httpStatus.BAD_REQUEST, error.message || '')
+
+    }
 }
 
 export const SemesterRegistrationService = {
