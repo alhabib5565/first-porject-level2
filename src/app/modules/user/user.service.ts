@@ -97,7 +97,6 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
 
         return faculty
     } catch (error) {
-        console.log(error)
         await session.abortTransaction();
         await session.endSession();
         throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create faculty');
