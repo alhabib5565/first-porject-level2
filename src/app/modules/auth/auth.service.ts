@@ -28,15 +28,19 @@ const loginUser = async (payload: TLoginUser) => {
         throw new AppError(httpStatus.FORBIDDEN, 'Password does not match!')
     }
 
-    const userData = {
+    const jwtPayload = {
         userId: user.id,
         role: user.role
     }
 
-    const to = jwt.sign(userData, config.secret as string, {
+    const accessToken = jwt.sign(jwtPayload, config.secret as string, {
         expiresIn: '10d'
     })
-    console.log(to)
+
+    return {
+        accessToken,
+        needsPasswordChange: user?.needsPasswordChange,
+    }
 }
 
 
