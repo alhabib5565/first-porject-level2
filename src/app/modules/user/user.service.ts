@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from "mongoose";
 import config from "../../config";
 import { AcademicSemester } from "../academicSemester/academicSemesterModel";
@@ -54,10 +55,10 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
         await session.endSession()
 
         return student
-    } catch (error) {
+    } catch (error: any) {
         await session.abortTransaction();
         await session.endSession();
-        throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
+        throw new AppError(httpStatus.BAD_REQUEST, error?.message || 'Failed to create student');
     }
 
 }
@@ -127,7 +128,6 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
         payload.id = newUser[0].id
 
         const admin = await Admin.create([payload], { session })
-
         if (!admin.length) {
             throw new AppError(httpStatus.BAD_REQUEST, 'admin create failed')
         }
