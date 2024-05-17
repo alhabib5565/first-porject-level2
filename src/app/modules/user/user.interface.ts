@@ -16,10 +16,8 @@ export type TUser = {
 
 export interface UserModel extends Model<TUser> {
     isUserExistByCustomId(id: string): Promise<TUser>
-    isPasswordMatched(
-        plainTextPassword: string,
-        hashedPassword: string,
-    ): Promise<boolean>;
+    isPasswordMatched(plainTextPassword: string, hashedPassword: string): Promise<boolean>;
+    isJwtIssuedBeforePasswordChange(passwordChangeTimestamps: Date, jwtIssuedTimestamps: number): boolean
 }
 
 export type TUSER_ROLE = keyof typeof USER_ROLE
