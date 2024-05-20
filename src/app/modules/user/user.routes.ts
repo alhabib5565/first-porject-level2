@@ -10,8 +10,26 @@ import { USER_ROLE } from './user.constant'
 const router = express.Router()
 
 
-router.post('/create-student', auth(USER_ROLE.admin), validateRequest(studentValidations.createStudentValidationSchema), userController.createStudent)
-router.post('/create-faculty', auth(), validateRequest(facultyValidations.createFacultyValidationSchema), userController.createFaculty)
-router.post('/create-admin', validateRequest(AdminValidations.createAdminValidationSchema), userController.createAdmin)
-
+router.post(
+    '/create-student',
+    auth(USER_ROLE.admin),
+    validateRequest(studentValidations.createStudentValidationSchema),
+    userController.createStudent
+)
+router.post(
+    '/create-faculty',
+    auth('admin'),
+    validateRequest(facultyValidations.createFacultyValidationSchema),
+    userController.createFaculty
+)
+router.post(
+    '/create-admin',
+    validateRequest(AdminValidations.createAdminValidationSchema),
+    userController.createAdmin
+)
+router.get(
+    '/get-me',
+    auth('admin', 'faculty', 'student'),
+    userController.getMe
+)
 export const userRouter = router

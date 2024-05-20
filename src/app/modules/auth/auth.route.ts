@@ -7,8 +7,28 @@ const router = express.Router()
 
 router.post('/login',
     validateRequest(authValidations.loginUserValidationSchema),
-    AuthController.loginUser);
-router.post('/change-password', auth(), validateRequest(authValidations.passwordChangeValidationSchema), AuthController.changePassword)
+    AuthController.loginUser
+);
+router.post(
+    '/refresh-token',
+    AuthController.refreshToken
+)
+router.post(
+    '/change-password',
+    auth('admin', 'faculty', 'student'),
+    validateRequest(authValidations.passwordChangeValidationSchema),
+    AuthController.changePassword
+)
+router.post(
+    '/forget-password',
+    validateRequest(authValidations.forgetPasswordValidationSchema),
+    AuthController.forgetPassword
+)
+router.post(
+    '/reset-password',
+    validateRequest(authValidations.resetPasswordValidationSchema),
+    AuthController.resetPassword
+)
 
 
 export const AuthRoutes = router;

@@ -13,6 +13,7 @@ import { TFaculty } from "../faculty/faculty.interface";
 import { Faculty } from "../faculty/faculty.model";
 import { TAdmin } from "../admin/admin.interface";
 import { Admin } from "../admin/admin.model";
+import { USER_ROLE } from "./user.constant";
 
 
 
@@ -21,6 +22,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     const user: Partial<TUser> = {}
 
     user.role = 'student'
+    user.email = payload.email
     if (!password) {
         user.password = config.password as string
     } else {
@@ -67,6 +69,8 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
     const user: Partial<TUser> = {}
     user.role = 'faculty'
+    user.email = payload.email
+
     if (!password) {
         user.password = config.password as string
     } else {
@@ -105,21 +109,23 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
 }
 
 const createAdminIntoDB = async (password: string, payload: TAdmin) => {
-    const userData: Partial<TUser> = {}
+    const user: Partial<TUser> = {}
     // console.log(password, payload)
-    userData.role = 'admin'
+    user.role = 'admin'
+    user.email = payload.email
+
     if (!password) {
-        userData.password = config.password as string
+        user.password = config.password as string
     } else {
-        userData.password = password
+        user.password = password
     }
 
     const session = await mongoose.startSession()
     try {
         session.startTransaction()
-        userData.id = await generateAdminId()
+        user.id = await generateAdminId()
 
-        const newUser = await User.create([userData], { session })
+        const newUser = await User.create([user], { session })
 
         if (!newUser.length) {
             throw new AppError(httpStatus.BAD_REQUEST, 'user create failed')
@@ -143,8 +149,25 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
     }
 }
 
+
+const getMe = async (userId: string, role: string) => {
+    console.log(userId)
+    let result = null
+    if (role === USER_ROLE.admin) {
+        result = await Admin.findOne({ id: userId })
+    }
+    if (role === USER_ROLE.faculty) {
+        result = await Faculty.findOne({ id: userId, })
+    }
+    if (role === USER_ROLE.student) {
+        result = await Student.findOne({ id: userId })
+    }
+    return result
+}
+
 export const userService = {
     createStudentIntoDB,
     createFacultyIntoDB,
-    createAdminIntoDB
+    createAdminIntoDB,
+    getMe
 }

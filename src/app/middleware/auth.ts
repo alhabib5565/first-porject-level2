@@ -16,7 +16,7 @@ export const auth = (...requiredRoles: TUSER_ROLE[]) => {
             throw new AppError(httpStatus.NOT_FOUND, 'You are not authorized')
         }
 
-        const decode = jwt.verify(token, config.secret as string) as JwtPayload
+        const decode = jwt.verify(token, config.access_secret as string) as JwtPayload
 
         const { role, userId, iat } = decode
 
