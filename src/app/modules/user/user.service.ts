@@ -14,10 +14,11 @@ import { Faculty } from "../faculty/faculty.model";
 import { TAdmin } from "../admin/admin.interface";
 import { Admin } from "../admin/admin.model";
 import { USER_ROLE } from "./user.constant";
+import { sendImageToCloudinary } from "../../../utils/sendImageTocloudinary";
 
 
 
-const createStudentIntoDB = async (password: string, payload: TStudent) => {
+const createStudentIntoDB = async (file: any, password: string, payload: TStudent) => {
 
     const user: Partial<TUser> = {}
 
@@ -36,6 +37,11 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     const session = await mongoose.startSession()
 
     try {
+        const imageName = `${user.id}${payload?.name?.firstName}`;
+
+        const profileImg = await sendImageToCloudinary(file.path, imageName)
+        payload.profileImg = profileImg?.secure_url
+
         session.startTransaction()
         user.id = await generateStudentId(admissionSemester)
         // create a user (transaction-1)
@@ -151,7 +157,6 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
 
 
 const getMe = async (userId: string, role: string) => {
-    console.log(userId)
     let result = null
     if (role === USER_ROLE.admin) {
         result = await Admin.findOne({ id: userId })

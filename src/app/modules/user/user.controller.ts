@@ -9,7 +9,7 @@ const createStudent = catchAsync(async (req, res) => {
     const { password, student } = req.body
     // const zodParseData = StudentValidationSchema.parse(studentData)
     //         console.log(zodParseData)
-    const result = await userService.createStudentIntoDB(password, student)
+    const result = await userService.createStudentIntoDB(req.file, password, student)
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
