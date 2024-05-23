@@ -4,6 +4,8 @@ import { TEnrolledCourse } from "./enrolledCourse.interface"
 import AppError from "../../errors/appErrors";
 import { Student } from "../students.model";
 import EnrolledCourse from "./enrolledCourse.model";
+import { SemesterRegistration } from "../semesterRegistration/semesterRegistration.model";
+import { Course } from "../courses/courses.model";
 import { startSession } from "mongoose";
 
 const createEnrolledCourseIntoDB = async (userId: string, payload: TEnrolledCourse) => {
@@ -34,6 +36,54 @@ const createEnrolledCourseIntoDB = async (userId: string, payload: TEnrolledCour
     if (isStudentAlreadyEnrolled) {
         throw new AppError(httpStatus.CONFLICT, 'Student is already enrolled !');
     }
+
+    // check total credits exceeds maxCredit
+    const course = await Course.findById(isOfferedCourseExists.course);
+    const currentCredit = course?.credits;
+
+    const semesterRegistration = await SemesterRegistration.findById(isOfferedCourseExists.semesterRegistration).select('maxCredit')
+    const maxCredit = semesterRegistration?.maxCredit
+
+
+    const enrolledCoursesCredit = await EnrolledCourse.aggregate([
+        {
+            $match: {
+                semesterRegistration: isOfferedCourseExists.semesterRegistration,
+                student: student._id
+            }
+        },
+        {
+            $lookup: {
+                from: 'courses',
+                localField: 'course',
+                foreignField: '_id',
+                as: 'enrolledCourseData'
+            }
+        },
+        {
+            $unwind: '$enrolledCourseData'
+        },
+        {
+            $project: { "enrolledCourseData.credits": 1 }
+        },
+        {
+            $group: {
+                _id: null,
+                totalEnrolledCredits: { $sum: '$enrolledCourseData.credits' }
+            }
+        }
+    ])
+
+    const totalCredits =
+        enrolledCoursesCredit.length > 0 ? enrolledCoursesCredit[0].totalEnrolledCredits : 0;
+
+    if (totalCredits && maxCredit && totalCredits + currentCredit > maxCredit) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            'You have exceeded maximum number of credits !',
+        );
+    }
+
     const session = await startSession()
     try {
         session.startTransaction()
