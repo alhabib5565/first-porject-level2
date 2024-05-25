@@ -7,6 +7,8 @@ import EnrolledCourse from "./enrolledCourse.model";
 import { SemesterRegistration } from "../semesterRegistration/semesterRegistration.model";
 import { Course } from "../courses/courses.model";
 import { startSession } from "mongoose";
+import { Faculty } from "../faculty/faculty.model";
+import { calculateGradeAndPoints } from "./enrolledCourse.utils";
 
 const createEnrolledCourseIntoDB = async (userId: string, payload: TEnrolledCourse) => {
 
@@ -114,10 +116,91 @@ const createEnrolledCourseIntoDB = async (userId: string, payload: TEnrolledCour
     } catch (error) {
         await session.abortTransaction()
         await session.endSession()
-
+        throw new Error('enrolled course faild')
     }
 }
 
+const updateEnrolledCourseMarksIntoDB = async (facultyId: string,
+    payload: Partial<TEnrolledCourse>,) => {
+    const { semesterRegistration, offeredCourse, student, courseMarks } = payload;
+
+    const isSemesterRegistrationExists =
+        await SemesterRegistration.findById(semesterRegistration);
+
+    if (!isSemesterRegistrationExists) {
+        throw new AppError(
+            httpStatus.NOT_FOUND,
+            'Semester registration not found !',
+        );
+    }
+
+    const isOfferedCourseExists = await OfferedCourse.findById(offeredCourse);
+
+    if (!isOfferedCourseExists) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Offered course not found !');
+    }
+    const isStudentExists = await Student.findById(student);
+
+    if (!isStudentExists) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Student not found !');
+    }
+
+    const faculty = await Faculty.findOne({ id: facultyId }, { _id: 1 });
+
+    if (!faculty) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found !');
+    }
+
+    const isCourseBelongToFaculty = await EnrolledCourse.findOne({
+        semesterRegistration,
+        offeredCourse,
+        student,
+        faculty: faculty._id,
+    });
+
+    if (!isCourseBelongToFaculty) {
+        throw new AppError(httpStatus.FORBIDDEN, 'You are forbidden! !');
+    }
+
+    const modifiedCourseMarksData: Record<string, unknown> = {
+        // 'courseMarks.midTerm': 12
+    }
+
+    if (courseMarks && Object.keys(courseMarks).length) {
+        for (const [key, value] of Object.entries(courseMarks)) {
+            modifiedCourseMarksData[`courseMarks.${key}`] = value
+        }
+    }
+
+    if (courseMarks?.finalTerm) {
+        const { classTest1, classTest2, midTerm, finalTerm } =
+            isCourseBelongToFaculty.courseMarks;
+
+        const totalMarks =
+            Math.ceil(classTest1 * 0.1) +
+            Math.ceil(midTerm * 0.3) +
+            Math.ceil(classTest2 * 0.1) +
+            Math.ceil(finalTerm * 0.5);
+
+        const result = calculateGradeAndPoints(totalMarks);
+
+        modifiedCourseMarksData.grade = result.grade;
+        modifiedCourseMarksData.gradePoints = result.gradePoints;
+        modifiedCourseMarksData.isCompleted = true;
+    }
+
+    const result = await EnrolledCourse.findByIdAndUpdate(
+        isCourseBelongToFaculty._id,
+        modifiedCourseMarksData,
+        {
+            new: true,
+        },
+    );
+
+    return result;
+}
+
 export const EnrolledCourseService = {
-    createEnrolledCourseIntoDB
+    createEnrolledCourseIntoDB,
+    updateEnrolledCourseMarksIntoDB
 }

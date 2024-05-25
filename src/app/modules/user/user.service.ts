@@ -37,12 +37,12 @@ const createStudentIntoDB = async (file: any, password: string, payload: TStuden
     const session = await mongoose.startSession()
 
     try {
+        session.startTransaction()
         const imageName = `${user.id}${payload?.name?.firstName}`;
 
-        const profileImg = await sendImageToCloudinary(file.path, imageName)
+        const profileImg = await sendImageToCloudinary(file?.path, imageName)
         payload.profileImg = profileImg?.secure_url
 
-        session.startTransaction()
         user.id = await generateStudentId(admissionSemester)
         // create a user (transaction-1)
         const newUser = await User.create([user], { session })
